@@ -1,6 +1,10 @@
-id = "package-swift"
-name = "Package Swift LSP Extension"
+id = "package-swift-lsp"
+name = "Package.swift LSP"
 version = "0.0.1"
 schema_version = 1
 authors = ["kattouf <vasiliy.kattouf@gmail.com"]
-repository = "https://github.com/zed-extensions/package-swift"
+repository = "https://github.com/zed-extensions/package-swift-lsp"
+
+[language_servers.package-swift-lsp]
+name = "Package.swift LSP"
+languages = ["Swift"]
