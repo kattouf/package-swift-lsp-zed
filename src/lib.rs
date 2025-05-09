@@ -98,22 +98,48 @@ impl PackageSwiftLSPExtension {
         fs::create_dir_all(&version_dir)
             .map_err(|err| format!("failed to create directory '{version_dir}': {err}"))?;
 
-        // We've already confirmed this is macOS, so no need to check again
         let binary_path = format!("{version_dir}/{bin_name}", bin_name = EXECUTABLE_NAME);
-
         if !fs::metadata(&binary_path).map_or(false, |stat| stat.is_file()) {
             zed::set_language_server_installation_status(
                 language_server_id,
                 &zed::LanguageServerInstallationStatus::Downloading,
             );
 
-            // Adjust this based on how your binary is packaged
+            // Download the binary
             zed::download_file(
                 &asset.download_url,
                 &binary_path,
                 zed::DownloadedFileType::Zip,
             )
             .map_err(|err| format!("failed to download file: {err}"))?;
+
+            // Correct the path to the actual binary location which has extra nesting
+            // If downloading the zip creates additional nested directories, find the actual binary
+            let nested_binary_path = format!(
+                "{version_dir}/{bin_name}/{bin_name}",
+                bin_name = EXECUTABLE_NAME
+            );
+
+            if fs::metadata(&nested_binary_path).map_or(false, |stat| stat.is_file()) {
+                let temp_binary_path =
+                    format!("{version_dir}/temp_{bin_name}", bin_name = EXECUTABLE_NAME);
+
+                // First copy to a temporary path
+                if let Err(err) = fs::copy(&nested_binary_path, &temp_binary_path) {
+                    return Err(format!("failed to copy nested binary to temp: {err}").into());
+                }
+
+                // Remove nested directory with the original binary
+                fs::remove_dir_all(&binary_path)
+                    .map_err(|err| format!("failed to remove nested directory: {err}"))?;
+
+                // Now move from temp to the correct path
+                if let Err(err) = fs::rename(&temp_binary_path, &binary_path) {
+                    return Err(
+                        format!("failed to move temp binary to final location: {err}").into(),
+                    );
+                }
+            }
 
             zed::make_file_executable(&binary_path)?;
 
