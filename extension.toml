@@ -1,9 +1,10 @@
 id = "package-swift-lsp"
 name = "Package.swift LSP"
-version = "0.0.1"
+version = "1.0.0"
 schema_version = 1
 authors = ["kattouf <vasiliy.kattouf@gmail.com"]
-repository = "https://github.com/zed-extensions/package-swift-lsp"
+description = "Language Server Protocol (LSP) implementation for Swift Package Manager's Package.swift manifest files."
+repository = "https://github.com/kattouf/package-swift-lsp-zed"
 
 [language_servers.package-swift-lsp]
 name = "Package.swift LSP"
