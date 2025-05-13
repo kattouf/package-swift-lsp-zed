@@ -1,3 +1,5 @@
-# Extension for Package.swift LSP
+# Package.swift LSP Extension
 
-Extension that adds support for https://github.com/kattouf/package-swift-lsp for https://zed.dev
+[Zed](https://zed.dev) extension that adds support for [package-swift-lsp](https://github.com/kattouf/package-swift-lsp)
+
+![demo](https://github.com/user-attachments/assets/4caa7126-a2d7-45dd-b663-2d3f31817f74)
