@@ -72,20 +72,25 @@ impl PackageSwiftLSPExtension {
         // Asset name pattern should match your GitHub release assets
         // package-swift-lsp-1.0.0-arm64-apple-macosx.zip
         // package-swift-lsp-1.0.0-x86_64-apple-macosx.zip
+        // package-swift-lsp-1.0.0-x86_64-unknown-linux-gnu.zip
+        // package-swift-lsp-1.0.0-aarch64-unknown-linux-gnu.zip
+        let target_triple = match (arch, platform) {
+            (zed::Architecture::X8664, zed::Os::Mac) => "x86_64-apple-macosx",
+            (zed::Architecture::Aarch64, zed::Os::Mac) => "arm64-apple-macosx",
+            (zed::Architecture::X8664, zed::Os::Linux) => "x86_64-unknown-linux-gnu",
+            (zed::Architecture::Aarch64, zed::Os::Linux) => "aarch64-unknown-linux-gnu",
+            _ => {
+                return Err(format!(
+                    "Unsupported platform/architecture combination: {:?}/{:?}",
+                    platform, arch
+                )
+                .into())
+            }
+        };
+
         let asset_name = format!(
-            "{}-{}-{}-{}.zip",
-            EXECUTABLE_NAME,
-            release.version,
-            match arch {
-                zed::Architecture::Aarch64 => "arm64",
-                zed::Architecture::X86 => "x86",
-                zed::Architecture::X8664 => "x86_64",
-            },
-            match platform {
-                zed::Os::Mac => "apple-macosx",
-                zed::Os::Linux => "linux",
-                zed::Os::Windows => "windows",
-            },
+            "{}-{}-{}.zip",
+            EXECUTABLE_NAME, release.version, target_triple,
         );
 
         let asset = release
@@ -180,9 +185,9 @@ impl zed::Extension for PackageSwiftLSPExtension {
     ) -> Result<zed::Command> {
         // Check platform compatibility early
         let (platform, arch) = zed::current_platform();
-        if platform != zed::Os::Mac {
+        if platform != zed::Os::Mac && platform != zed::Os::Linux {
             return Err(format!(
-                "Package.swift LSP is currently only supported on macOS, not on {:?}",
+                "Package.swift LSP is currently only supported on macOS and Linux, not on {:?}",
                 platform
             )
             .into());
